@@ -23,9 +23,15 @@ jobs:
         run: |
           apt-get update
           DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-            build-essential ca-certificates cargo debhelper devscripts git libdbus-1-dev \
+            build-essential ca-certificates debhelper devscripts git libdbus-1-dev \
             libegl1-mesa-dev libfontconfig1-dev libfreetype-dev libsecret-1-dev \
-            libssl-dev libwayland-dev libxkbcommon-dev pkg-config rustc
+            libssl-dev libwayland-dev libxkbcommon-dev pkg-config rustup
+
+      - name: Install current stable Rust
+        run: |
+          rustup toolchain install stable --profile minimal
+          rustup default stable
+          echo "$HOME/.cargo/bin" >> "$GITHUB_PATH"
 
       - uses: actions/checkout@v6
         with:
@@ -65,7 +71,7 @@ jobs:
     steps:
       - name: Install build dependencies
         run: |
-          pacman -Syu --noconfirm --needed cargo git libsecret openssl pkgconf sudo wayland xkbcommon
+          pacman -Syu --noconfirm --needed cargo git libsecret libxkbcommon openssl pkgconf sudo wayland
           useradd --create-home builder
           printf 'builder ALL=(ALL) NOPASSWD: /usr/bin/pacman\n' > /etc/sudoers.d/builder
           chmod 0440 /etc/sudoers.d/builder

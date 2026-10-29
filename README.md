@@ -36,7 +36,7 @@ The package installs the applet binary, desktop entry, and icon under `/usr`. It
 Install the base build dependencies and Rust:
 
 ```sh
-sudo pacman -S --needed base-devel git rust cargo just pkgconf openssl libsecret
+sudo pacman -S --needed base-devel git rust cargo just pkgconf openssl libsecret libxkbcommon wayland
 ```
 
 Build from this directory:
@@ -59,7 +59,12 @@ Your Secret Service keyring must be available and unlocked. `secret-tool` stores
 
 ## Debian package
 
-The `debian/` directory contains Debian packaging metadata. From a Debian build environment with the package build dependencies installed, build a binary package with:
+The `debian/` directory contains Debian packaging metadata. Install Rust's stable toolchain and the package build dependencies, then build a binary package with:
+
+```sh
+rustup toolchain install stable --profile minimal
+rustup default stable
+```
 
 ```sh
 dpkg-buildpackage -us -uc -b
