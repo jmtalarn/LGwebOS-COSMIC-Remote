@@ -1,0 +1,13 @@
+[Desktop Entry]
+Name=LG webOS Remote
+Comment=Control an LG webOS TV on your local network
+Type=Application
+Icon=io.github.tvmenubar.LGWebOSRemote
+Exec=lg-webos-cosmic
+Terminal=false
+StartupNotify=true
+Categories=COSMIC;Utility;
+Keywords=COSMIC;LG;webOS;TV;Remote;
+NoDisplay=true
+X-CosmicApplet=true
+X-CosmicHoverPopup=Auto

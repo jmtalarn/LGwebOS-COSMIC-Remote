@@ -1,0 +1,20 @@
+[package]
+name = "lg-webos-cosmic"
+version = "0.1.0"
+edition = "2024"
+description = "A COSMIC panel applet for controlling LG webOS TVs on your local network"
+license = "MIT"
+
+[dependencies]
+libcosmic = { git = "https://github.com/pop-os/libcosmic.git", default-features = false, features = ["applet", "applet-token", "dbus-config", "multi-window", "tokio", "wayland", "winit"] }
+native-tls = "0.2"
+sha2 = "0.10"
+tokio = { version = "1", features = ["io-util", "net", "process", "sync", "time"] }
+tokio-native-tls = "0.3"
+tokio-tungstenite = { version = "0.26", features = ["native-tls"] }
+serde_json = "1"
+futures-util = "0.3"
+tracing-log = "0.2"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+url = "2"
+

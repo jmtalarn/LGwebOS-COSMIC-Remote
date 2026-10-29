@@ -1,0 +1,52 @@
+# LG webOS Remote for COSMIC
+
+A separate Linux COSMIC panel applet for controlling LG webOS TVs on your local network. This is an early port of the LG remote in this repository; it does not change either macOS app.
+
+## Current scope
+
+- COSMIC panel applet with a bundled aerial-TV icon and separate Control, Apps, Inputs, Pointer, Picture, and Setup tabs
+- SSDP discovery of LG webOS TVs on the local network
+- Encrypted webOS pairing on port 3001
+- First-use SHA-256 certificate review; a changed saved certificate is rejected
+- Pairing keys and certificate pins stored with GNOME Secret Service through `secret-tool`
+- Icon-based directional, Home, Back, OK, volume, channel, playback, keyboard-text, and power-off controls
+- Mouse-like pointer movement and click through the TV's certificate-pinned pointer socket
+- Read and adjust supported picture settings, then apply them explicitly
+- Search installed apps before launching them
+- Query installed apps and inputs, launch apps, and switch inputs
+
+The LG TV must be on the same local network. During first pairing, approve the fingerprint in the popup and then accept the pairing request on the TV. The TLS certificate is inspected before the app sends pairing or control data. Credentials are not saved to app configuration.
+
+If the TV reports `401 Unauthorized` for apps or pointer control after updating the applet, open **Setup → Forget saved pairing**, reconnect, review the certificate, and accept the new pairing request on the TV. The updated registration explicitly requests the app-list, keyboard, and pointer permissions. This reset only removes this applet's local credentials; it does not send a TV control command.
+
+Compatibility is not yet verified on a TV from Linux. The original controller was tested with one webOS 5.0 TV; this applet needs separate testing before additional versions can be claimed.
+
+## CachyOS / Arch build
+
+Install the base build dependencies and Rust:
+
+```sh
+sudo pacman -S --needed base-devel git rust cargo just pkgconf openssl libsecret
+```
+
+Build from this directory:
+
+```sh
+cargo build --release
+```
+
+Install the binary and COSMIC applet desktop entry into the user profile:
+
+```sh
+install -Dm755 target/release/lg-webos-cosmic ~/.local/bin/lg-webos-cosmic
+install -Dm644 resources/io.github.tvmenubar.LGWebOSRemote.desktop ~/.local/share/applications/io.github.tvmenubar.LGWebOSRemote.desktop
+install -Dm644 resources/io.github.tvmenubar.LGWebOSRemote.svg ~/.local/share/icons/hicolor/scalable/apps/io.github.tvmenubar.LGWebOSRemote.svg
+```
+
+Restart the COSMIC panel/session, then add **LG webOS Remote** from the panel applet picker. If the picker does not list it, confirm that your COSMIC build supports third-party applets and that the desktop file is present under `~/.local/share/applications`.
+
+Your Secret Service keyring must be available and unlocked. `secret-tool` stores the TV certificate pin and pairing key separately for each TV address.
+
+## Current limitations
+
+Wake-on-LAN, TV-provided app icons, screen-time history, and media casting are not implemented yet. You can discover TVs on the local network or enter an IPv4 address manually. Picture adjustments depend on TV permissions. The libcosmic dependency tracks its upstream Git repository, whose APIs can change; compile against the COSMIC version installed on your system.
