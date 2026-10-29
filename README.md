@@ -69,7 +69,7 @@ The resulting `.deb` installs the applet binary, desktop entry, and icon under `
 
 ## GitHub release packages
 
-Publishing a GitHub Release with a `v`-prefixed tag matching the version in `Cargo.toml` (for example, `v0.1.0`) triggers `.github/workflows/release-packages.yml`. It builds the Debian package in Debian 13 and an Arch package, then attaches both files to the release. Cargo uses the committed `Cargo.lock`, including the pinned `libcosmic` Git revision.
+Publishing a GitHub Release with a `v`-prefixed tag matching the version in `Cargo.toml` (for example, `v0.1.0`) triggers `.github/workflows/release-packages.yml`. It builds the Debian package in Debian 13 and an Arch package, then attaches both files to the release. Cargo uses the committed `Cargo.lock`, including the pinned `libcosmic` Git revision. To rebuild packages for an existing release, run the workflow manually from the Actions tab and enter its tag.
 
 ## Current limitations
 

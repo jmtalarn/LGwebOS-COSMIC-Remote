@@ -2,7 +2,10 @@ Source: lg-webos-cosmic
 Section: utils
 Priority: optional
 Maintainer: J. M. Talarn <jmtalarn@users.noreply.github.com>
-Build-Depends: debhelper-compat (= 13), cargo, rustc, pkg-config, libssl-dev
+Build-Depends: debhelper-compat (= 13), build-essential, cargo, rustc,
+ pkg-config, libdbus-1-dev, libegl1-mesa-dev, libfontconfig1-dev,
+ libfreetype-dev, libsecret-1-dev, libssl-dev, libwayland-dev,
+ libxkbcommon-dev
 Standards-Version: 4.6.2
 Rules-Requires-Root: no
 Homepage: https://github.com/jmtalarn/LGwebOS-COSMIC-Remote

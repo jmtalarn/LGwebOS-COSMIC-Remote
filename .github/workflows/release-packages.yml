@@ -3,6 +3,12 @@ name: Build release packages
 on:
   release:
     types: [published]
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: Existing release tag to build packages for
+        required: true
+        type: string
 
 permissions:
   contents: read
@@ -17,21 +23,28 @@ jobs:
         run: |
           apt-get update
           DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-            ca-certificates cargo debhelper devscripts git libdbus-1-dev \
+            build-essential ca-certificates cargo debhelper devscripts git libdbus-1-dev \
             libegl1-mesa-dev libfontconfig1-dev libfreetype-dev libsecret-1-dev \
             libssl-dev libwayland-dev libxkbcommon-dev pkg-config rustc
 
       - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.release.tag_name || inputs.release_tag }}
 
       - name: Check release version and set Debian package version
         shell: bash
+        env:
+          RELEASE_TAG: ${{ github.event.release.tag_name || inputs.release_tag }}
         run: |
-          version="${GITHUB_REF_NAME#v}"
+          version="${RELEASE_TAG#v}"
           cargo_version="$(sed -n 's/^version = "\([^"]*\)"/\1/p' Cargo.toml | head -n1)"
-          test "$GITHUB_REF_NAME" = "v$version"
+          test "$RELEASE_TAG" = "v$version"
           test "$version" = "$cargo_version"
-          dch --newversion "${version}-1" --distribution unstable \
-            --force-distribution "GitHub release ${version}."
+          current_version="$(dpkg-parsechangelog --show-field Version)"
+          if [ "$current_version" != "${version}-1" ]; then
+            dch --newversion "${version}-1" --distribution unstable \
+              --force-distribution "GitHub release ${version}."
+          fi
 
       - name: Build .deb
         run: |
@@ -52,19 +65,23 @@ jobs:
     steps:
       - name: Install build dependencies
         run: |
-          pacman -Syu --noconfirm --needed cargo git libsecret openssl pkgconf sudo
+          pacman -Syu --noconfirm --needed cargo git libsecret openssl pkgconf sudo wayland xkbcommon
           useradd --create-home builder
           printf 'builder ALL=(ALL) NOPASSWD: /usr/bin/pacman\n' > /etc/sudoers.d/builder
           chmod 0440 /etc/sudoers.d/builder
 
       - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.release.tag_name || inputs.release_tag }}
 
       - name: Check release version and set Arch package version
         shell: bash
+        env:
+          RELEASE_TAG: ${{ github.event.release.tag_name || inputs.release_tag }}
         run: |
-          version="${GITHUB_REF_NAME#v}"
+          version="${RELEASE_TAG#v}"
           cargo_version="$(sed -n 's/^version = "\([^"]*\)"/\1/p' Cargo.toml | head -n1)"
-          test "$GITHUB_REF_NAME" = "v$version"
+          test "$RELEASE_TAG" = "v$version"
           test "$version" = "$cargo_version"
           sed -i "s/^pkgver=.*/pkgver=${version}/" PKGBUILD
 
@@ -98,5 +115,5 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
-          RELEASE_TAG: ${{ github.event.release.tag_name }}
+          RELEASE_TAG: ${{ github.event.release.tag_name || inputs.release_tag }}
         run: gh release upload "$RELEASE_TAG" release-packages/* --clobber

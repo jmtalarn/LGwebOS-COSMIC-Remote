@@ -6,7 +6,7 @@ arch=('x86_64' 'aarch64')
 url='https://github.com/jmtalarn/LGwebOS-COSMIC-Remote'
 license=('MIT')
 depends=('openssl' 'libsecret')
-makedepends=('cargo' 'git' 'pkgconf')
+makedepends=('cargo' 'git' 'pkgconf' 'wayland' 'xkbcommon')
 source=()
 sha256sums=()
 
