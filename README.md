@@ -21,7 +21,17 @@ If the TV reports `401 Unauthorized` for apps or pointer control after updating 
 
 Compatibility is not yet verified on a TV from Linux. The original controller was tested with one webOS 5.0 TV; this applet needs separate testing before additional versions can be claimed.
 
-## CachyOS / Arch build
+## Arch Linux package
+
+Build and install a local package from this checkout:
+
+```sh
+makepkg -si
+```
+
+The package installs the applet binary, desktop entry, and icon under `/usr`. Its runtime requirements are OpenSSL and GNOME Secret Service (`libsecret`), including the `secret-tool` command. A compatible COSMIC desktop session is required to use the applet. To build manually without packaging, use the steps below.
+
+## CachyOS / Arch manual build
 
 Install the base build dependencies and Rust:
 
@@ -46,6 +56,20 @@ install -Dm644 resources/io.github.tvmenubar.LGWebOSRemote.svg ~/.local/share/ic
 Restart the COSMIC panel/session, then add **LG webOS Remote** from the panel applet picker. If the picker does not list it, confirm that your COSMIC build supports third-party applets and that the desktop file is present under `~/.local/share/applications`.
 
 Your Secret Service keyring must be available and unlocked. `secret-tool` stores the TV certificate pin and pairing key separately for each TV address.
+
+## Debian package
+
+The `debian/` directory contains Debian packaging metadata. From a Debian build environment with the package build dependencies installed, build a binary package with:
+
+```sh
+dpkg-buildpackage -us -uc -b
+```
+
+The resulting `.deb` installs the applet binary, desktop entry, and icon under `/usr`. Runtime requirements include `libsecret-tools` for `secret-tool`, OpenSSL libraries, and a compatible COSMIC desktop session. Rust dependencies, including `libcosmic`, must be available to Cargo while building. The Git based `libcosmic` dependency means fully offline/reproducible Debian builds will need a vendored dependency source prepared for the target release.
+
+## GitHub release packages
+
+Publishing a GitHub Release with a `v`-prefixed tag matching the version in `Cargo.toml` (for example, `v0.1.0`) triggers `.github/workflows/release-packages.yml`. It builds the Debian package in Debian 13 and an Arch package, then attaches both files to the release. Cargo uses the committed `Cargo.lock`, including the pinned `libcosmic` Git revision.
 
 ## Current limitations
 

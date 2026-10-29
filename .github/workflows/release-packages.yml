@@ -1,0 +1,102 @@
+name: Build release packages
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+
+jobs:
+  debian:
+    name: Build Debian package
+    runs-on: ubuntu-24.04
+    container: debian:trixie
+    steps:
+      - name: Install build dependencies
+        run: |
+          apt-get update
+          DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+            ca-certificates cargo debhelper devscripts git libdbus-1-dev \
+            libegl1-mesa-dev libfontconfig1-dev libfreetype-dev libsecret-1-dev \
+            libssl-dev libwayland-dev libxkbcommon-dev pkg-config rustc
+
+      - uses: actions/checkout@v6
+
+      - name: Check release version and set Debian package version
+        shell: bash
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          cargo_version="$(sed -n 's/^version = "\([^"]*\)"/\1/p' Cargo.toml | head -n1)"
+          test "$GITHUB_REF_NAME" = "v$version"
+          test "$version" = "$cargo_version"
+          dch --newversion "${version}-1" --distribution unstable \
+            --force-distribution "GitHub release ${version}."
+
+      - name: Build .deb
+        run: |
+          dpkg-buildpackage --build=binary --no-sign
+          mkdir -p package-output
+          cp ../lg-webos-cosmic_*.deb package-output/
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: debian-package
+          path: package-output/*.deb
+          if-no-files-found: error
+
+  arch:
+    name: Build Arch package
+    runs-on: ubuntu-24.04
+    container: archlinux:base-devel
+    steps:
+      - name: Install build dependencies
+        run: |
+          pacman -Syu --noconfirm --needed cargo git libsecret openssl pkgconf sudo
+          useradd --create-home builder
+          printf 'builder ALL=(ALL) NOPASSWD: /usr/bin/pacman\n' > /etc/sudoers.d/builder
+          chmod 0440 /etc/sudoers.d/builder
+
+      - uses: actions/checkout@v6
+
+      - name: Check release version and set Arch package version
+        shell: bash
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          cargo_version="$(sed -n 's/^version = "\([^"]*\)"/\1/p' Cargo.toml | head -n1)"
+          test "$GITHUB_REF_NAME" = "v$version"
+          test "$version" = "$cargo_version"
+          sed -i "s/^pkgver=.*/pkgver=${version}/" PKGBUILD
+
+      - name: Build package
+        run: |
+          chown -R builder:builder "$GITHUB_WORKSPACE"
+          runuser -u builder -- makepkg --syncdeps --noconfirm
+          mkdir -p package-output
+          cp ./*.pkg.tar.* package-output/
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: arch-package
+          path: package-output/*.pkg.tar.*
+          if-no-files-found: error
+
+  attach:
+    name: Attach packages to GitHub Release
+    needs: [debian, arch]
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: release-packages
+          pattern: '*-package'
+          merge-multiple: true
+
+      - name: Upload packages to release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+        run: gh release upload "$RELEASE_TAG" release-packages/* --clobber

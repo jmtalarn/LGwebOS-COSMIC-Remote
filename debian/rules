@@ -1,0 +1,16 @@
+#!/usr/bin/make -f
+
+%:
+	dh $@
+
+override_dh_auto_build:
+	cargo build --release --locked
+
+override_dh_auto_install:
+	install -D -m 0755 target/release/lg-webos-cosmic debian/tmp/usr/bin/lg-webos-cosmic
+	install -D -m 0644 resources/io.github.tvmenubar.LGWebOSRemote.desktop debian/tmp/usr/share/applications/io.github.tvmenubar.LGWebOSRemote.desktop
+	install -D -m 0644 resources/io.github.tvmenubar.LGWebOSRemote.svg debian/tmp/usr/share/icons/hicolor/scalable/apps/io.github.tvmenubar.LGWebOSRemote.svg
+	install -D -m 0644 LICENSE debian/tmp/usr/share/doc/lg-webos-cosmic/copyright
+
+override_dh_auto_test:
+	# No automated test suite is defined yet.

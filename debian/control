@@ -1,0 +1,16 @@
+Source: lg-webos-cosmic
+Section: utils
+Priority: optional
+Maintainer: J. M. Talarn <jmtalarn@users.noreply.github.com>
+Build-Depends: debhelper-compat (= 13), cargo, rustc, pkg-config, libssl-dev
+Standards-Version: 4.6.2
+Rules-Requires-Root: no
+Homepage: https://github.com/jmtalarn/LGwebOS-COSMIC-Remote
+
+Package: lg-webos-cosmic
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, libsecret-tools
+Description: COSMIC panel applet for controlling LG webOS TVs
+ A COSMIC panel applet for discovering LG webOS televisions on the local
+ network, pairing securely, and controlling apps, inputs, and picture settings.
+ A compatible COSMIC desktop session is required to use the applet.

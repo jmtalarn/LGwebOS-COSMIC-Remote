@@ -1,1 +1,15 @@
 /target/
+
+# Arch package build output
+/pkg/
+/*.pkg.tar.*
+/*.src.tar.*
+
+# Debian package build output
+/debian/.debhelper/
+/debian/debhelper-build-stamp
+/debian/files
+/debian/*.debhelper.log
+/debian/*.substvars
+/debian/tmp/
+/debian/lg-webos-cosmic/
