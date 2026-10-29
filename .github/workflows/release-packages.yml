@@ -89,14 +89,15 @@ jobs:
           cargo_version="$(sed -n 's/^version = "\([^"]*\)"/\1/p' Cargo.toml | head -n1)"
           test "$RELEASE_TAG" = "v$version"
           test "$version" = "$cargo_version"
-          sed -i "s/^pkgver=.*/pkgver=${version}/" PKGBUILD
+          sed -i "s/^pkgver=.*/pkgver=${version}/" packaging/arch/PKGBUILD
 
       - name: Build package
         run: |
           chown -R builder:builder "$GITHUB_WORKSPACE"
+          cd packaging/arch
           runuser -u builder -- makepkg --syncdeps --noconfirm
-          mkdir -p package-output
-          cp ./*.pkg.tar.* package-output/
+          mkdir -p "$GITHUB_WORKSPACE/package-output"
+          cp ./*.pkg.tar.* "$GITHUB_WORKSPACE/package-output/"
 
       - uses: actions/upload-artifact@v4
         with:

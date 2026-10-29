@@ -4,6 +4,10 @@
 /pkg/
 /*.pkg.tar.*
 /*.src.tar.*
+/packaging/arch/pkg/
+/packaging/arch/src/
+/packaging/arch/*.pkg.tar.*
+/packaging/arch/*.src.tar.*
 
 # Debian package build output
 /debian/.debhelper/

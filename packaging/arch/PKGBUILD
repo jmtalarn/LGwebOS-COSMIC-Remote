@@ -11,19 +11,24 @@ source=()
 sha256sums=()
 
 prepare() {
-  cd "${startdir}"
+  local repo_root="${startdir}/../.."
+  local build_root="${srcdir}/${pkgname}"
+  mkdir -p "${build_root}"
+  cp "${repo_root}/Cargo.toml" "${repo_root}/Cargo.lock" "${repo_root}/LICENSE" "${build_root}/"
+  cp -a "${repo_root}/src" "${repo_root}/resources" "${build_root}/"
+  cd "${build_root}"
   export RUSTUP_TOOLCHAIN=stable
   cargo fetch --locked
 }
 
 build() {
-  cd "${startdir}"
+  cd "${srcdir}/${pkgname}"
   export RUSTUP_TOOLCHAIN=stable
   cargo build --release --locked
 }
 
 package() {
-  cd "${startdir}"
+  cd "${srcdir}/${pkgname}"
   install -Dm755 target/release/lg-webos-cosmic "${pkgdir}/usr/bin/lg-webos-cosmic"
   install -Dm644 resources/io.github.tvmenubar.LGWebOSRemote.desktop \
     "${pkgdir}/usr/share/applications/io.github.tvmenubar.LGWebOSRemote.desktop"

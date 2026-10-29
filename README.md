@@ -26,6 +26,7 @@ Compatibility is not yet verified on a TV from Linux. The original controller wa
 Build and install a local package from this checkout:
 
 ```sh
+cd packaging/arch
 makepkg -si
 ```
 
